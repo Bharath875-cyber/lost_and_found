@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusReclaim | Lost & Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-blue-900">CampusReclaim</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Browse Items</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">How it Works</a>
+                    <button class="bg-gray-900 text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition">
+                        Log In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-32 pb-20 px-4 text-center bg-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-50 to-white -z-10"></div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
+            Lost something? <br><span class="text-blue-600">Let's get it back.</span>
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-10">
+            The official student platform to report lost belongings and return found items. 
+            Fast, transparent, and connected to Campus Security.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <button onclick="openModal('lost')" class="px-8 py-4 bg-orange-500 text-white rounded-xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 hover:scale-105 transition transform flex items-center justify-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> I Lost Something
+            </button>
+            <button onclick="openModal('found')" class="px-8 py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 transition transform flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hand-holding-heart"></i> I Found Something
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex bg-white p-1 rounded-lg shadow-sm border border-gray-200">
+                <button onclick="filterItems('all')" class="px-4 py-2 rounded-md bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition">All</button>
+                <button onclick="filterItems('lost')" class="px-4 py-2 rounded-md text-gray-500 hover:bg-gray-50 transition">Lost</button>
+                <button onclick="filterItems('found')" class="px-4 py-2 rounded-md text-gray-500 hover:bg-gray-50 transition">Found</button>
+            </div>
+            
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                <input type="text" id="searchInput" onkeyup="searchItems()" placeholder="Search ID cards, AirPods..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+            </div>
+        </div>
+
+        <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2024 CampusReclaim. Built for students.</p>
+        </div>
+    </footer>
+
+    <div id="submissionModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Report Item</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            </div>
+            
+            <form id="itemForm" onsubmit="handleFormSubmit(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                        <input type="text" id="itemName" required placeholder="e.g. Blue Dell Laptop Charger" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <select id="itemLocation" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option>Library</option>
+                                <option>Cafeteria</option>
+                                <option>Science Block</option>
+                                <option>Gym</option>
+                                <option>Main Lawn</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="itemCategory" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option>Electronics</option>
+                                <option>ID Card / Wallet</option>
+                                <option>Clothing</option>
+                                <option>Books</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">Upload Photo (Optional)</p>
+                    </div>
+                    
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase SDKs (using Web URLs for browser compatibility)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // --- 1. YOUR CONFIGURATION (Transcribed from your screenshot) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD8so9s4jW6HRXqyv0xZLAPuPuS62UTiKU",
+            authDomain: "campusreclaim.firebaseapp.com",
+            projectId: "campusreclaim",
+            storageBucket: "campusreclaim.firebasestorage.app",
+            messagingSenderId: "550766051224",
+            appId: "1:550766051224:web:d4541777f3b7c96acc75ed",
+            measurementId: "G-0NRJ539QLR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const itemsCollection = collection(db, "items");
+        const provider = new GoogleAuthProvider();
+
+        // --- 2. STATE MANAGEMENT ---
+        let items = [];
+        let currentUser = null; // Tracks if user is logged in
+        let currentFilter = 'all';
+        const grid = document.getElementById('itemsGrid');
+
+        // --- 3. AUTHENTICATION LOGIC ---
+        
+        // Listen for login/logout changes
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            updateUIForAuth();
+        });
+
+        // Function to update buttons based on login status
+        function updateUIForAuth() {
+            const loginBtn = document.querySelector('nav button'); // The "Log In" button in nav
+            
+            if (currentUser) {
+                // User is logged in
+                loginBtn.textContent = "Log Out";
+                loginBtn.onclick = handleLogout;
+                loginBtn.classList.replace('bg-gray-900', 'bg-red-600'); // Make button red
+            } else {
+                // User is logged out
+                loginBtn.textContent = "Log In with Google";
+                loginBtn.onclick = handleLogin;
+                loginBtn.classList.replace('bg-red-600', 'bg-gray-900'); // Make button black
+            }
+        }
+
+        window.handleLogin = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                // Alert removed to make it smoother
+            } catch (error) {
+                console.error("Login failed", error);
+                alert("Login failed: " + error.message);
+            }
+        };
+
+        window.handleLogout = async () => {
+            try {
+                await signOut(auth);
+                alert("You have been logged out.");
+            } catch (error) {
+                console.error("Logout failed", error);
+            }
+        };
+
+        // --- 4. REAL-TIME DATA LISTENER ---
+        const q = query(itemsCollection, orderBy("timestamp", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            items = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                time: doc.data().timestamp ? new Date(doc.data().timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'
+            }));
+            applyFilterAndRender();
+        });
+
+        // --- 5. RENDER FUNCTIONS ---
+        function renderItems(data) {
+            grid.innerHTML = '';
+            
+            if(data.length === 0) {
+                grid.innerHTML = `<div class="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+                    <i class="fa-regular fa-folder-open text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 font-medium">No items reported yet.</p>
+                </div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const badgeColor = item.type === 'lost' ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600';
+                const btnText = item.type === 'lost' ? 'I Found This!' : 'Claim Item';
+                const btnColor = item.type === 'lost' ? 'hover:bg-emerald-50 text-emerald-600' : 'hover:bg-blue-50 text-blue-600';
+                
+                // Placeholder image logic
+                const imgUrl = item.image || (item.category === 'Books' ? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=300' : 
+                                              item.category === 'Electronics' ? 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&q=80&w=300' :
+                                              'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300');
+
+                // Add "Reported by" if available
+                const reporterInfo = item.userEmail ? `<div class="mt-2 text-xs text-gray-400">Posted by: ${item.userEmail.split('@')[0]}</div>` : '';
+
+                const card = `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group fade-in">
+                        <div class="h-48 overflow-hidden relative">
+                            <span class="absolute top-3 left-3 ${badgeColor} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide z-10">
+                                ${item.type}
+                            </span>
+                            <img src="${imgUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.title}</h3>
+                            <div class="flex items-center text-sm text-gray-500 mb-2 mt-2">
+                                <i class="fa-solid fa-location-dot mr-2"></i> ${item.location}
+                            </div>
+                            ${reporterInfo}
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-100 mt-3">
+                                <span class="text-xs text-gray-400 font-medium">${item.time}</span>
+                                <button onclick="contactUser('${item.userEmail}')" class="text-sm font-semibold ${btnColor} transition px-3 py-1.5 rounded-lg">
+                                    ${btnText} <i class="fa-solid fa-envelope ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function applyFilterAndRender() {
+            const queryText = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = items.filter(item => {
+                const matchesType = (currentFilter === 'all' || item.type === currentFilter);
+                const matchesSearch = (item.title.toLowerCase().includes(queryText) || item.location.toLowerCase().includes(queryText));
+                return matchesType && matchesSearch;
+            });
+            renderItems(filtered);
+        }
+
+        // --- 6. EXPOSED FUNCTIONS ---
+
+        window.filterItems = (type) => { currentFilter = type; applyFilterAndRender(); };
+        window.searchItems = () => { applyFilterAndRender(); };
+
+        window.openModal = (type) => {
+            // SECURITY CHECK: Only allow posting if logged in
+            if (!currentUser) {
+                alert("Please Log In (top right) to post an item.");
+                return;
+            }
+            window.currentModalType = type;
+            document.getElementById('modalTitle').innerText = type === 'lost' ? 'Report Lost Item' : 'Submit Found Item';
+            document.getElementById('submissionModal').classList.remove('hidden');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('submissionModal').classList.add('hidden');
+            document.getElementById('itemForm').reset();
+        };
+
+        window.contactUser = (email) => {
+             if (!currentUser) {
+                alert("Please Log In to contact the owner.");
+                return;
+            }
+            if (!email) {
+                alert("No contact info available for this item.");
+                return;
+            }
+            // Opens default email client
+            window.location.href = `mailto:${email}?subject=CampusReclaim Inquiry`;
+        };
+
+        window.handleFormSubmit = async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Posting...";
+            submitBtn.disabled = true;
+
+            try {
+                // We now include WHO posted the item (currentUser.email)
+                await addDoc(itemsCollection, {
+                    type: window.currentModalType,
+                    title: document.getElementById('itemName').value,
+                    location: document.getElementById('itemLocation').value,
+                    category: document.getElementById('itemCategory').value,
+                    timestamp: serverTimestamp(),
+                    userEmail: currentUser.email, // Saves the email of the logged-in student
+                    image: '' 
+                });
+                
+                window.closeModal();
+                alert("Success! Item posted to the live feed.");
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Error: " + error.message);
+            } finally {
+                submitBtn.innerText = "Submit Report";
+                submitBtn.disabled = false;
+            }
+        };
+        
+        // Initial setup for the Login button text
+        updateUIForAuth();
+    </script>
+    </body>
+    </html>
